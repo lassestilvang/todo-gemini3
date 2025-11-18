@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { TaskDetailSheet } from "@/components/tasks/TaskDetailSheet";
 
@@ -8,7 +9,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             <main className="flex-1 overflow-y-auto">
                 {children}
             </main>
-            <TaskDetailSheet />
+            <Suspense fallback={null}>
+                <TaskDetailSheet />
+            </Suspense>
         </div>
     );
 }

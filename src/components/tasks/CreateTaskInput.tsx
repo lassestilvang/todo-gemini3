@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Calendar, Flag } from "lucide-react";
+import { Calendar, Flag } from "lucide-react";
 import { createTask } from "@/lib/actions";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -95,7 +95,7 @@ export function CreateTaskInput({ listId }: { listId?: number }) {
                                                     variant="ghost"
                                                     size="sm"
                                                     className="justify-start"
-                                                    onClick={() => setPriority(p as any)}
+                                                    onClick={() => setPriority(p as "none" | "low" | "medium" | "high")}
                                                 >
                                                     {p.charAt(0).toUpperCase() + p.slice(1)}
                                                 </Button>

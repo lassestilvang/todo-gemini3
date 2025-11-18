@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Calendar, Flag, Clock } from "lucide-react";
 import { toggleTaskCompletion } from "@/lib/actions";

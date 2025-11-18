@@ -10,11 +10,9 @@ import {
     CalendarDays,
     Inbox,
     ListTodo,
-    Settings,
     Star,
     Plus,
     Hash,
-    Search
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 

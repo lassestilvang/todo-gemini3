@@ -6,34 +6,40 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { updateTask, deleteTask, getTasks, getTask } from "@/lib/actions";
+import { updateTask, deleteTask, getTask } from "@/lib/actions";
 // I need a way to fetch a single task. I'll add getTask to actions.
 // For now I'll assume I can pass the task or fetch it.
 
+// Define a type for the task state
+interface TaskState {
+    id: number;
+    title: string;
+    description: string | null;
+}
+
 export function TaskDetailSheet() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const taskId = searchParams.get("taskId");
-    const [isOpen, setIsOpen] = useState(false);
-    const [task, setTask] = useState<any>(null); // TODO: Type
-    const [isLoading, setIsLoading] = useState(false);
+
+    if (!taskId) return null;
+
+    return <TaskDetailSheetContent key={taskId} taskId={Number(taskId)} />;
+}
+
+function TaskDetailSheetContent({ taskId }: { taskId: number }) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [task, setTask] = useState<TaskState | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (taskId) {
-            setIsOpen(true);
-            setIsLoading(true);
-            getTask(Number(taskId)).then((t) => {
-                setTask(t);
-                setIsLoading(false);
-            });
-        } else {
-            setIsOpen(false);
-            setTask(null);
-        }
+        getTask(taskId).then((t) => {
+            setTask(t as TaskState);
+            setIsLoading(false);
+        });
     }, [taskId]);
 
     const handleClose = () => {
-        setIsOpen(false);
         const params = new URLSearchParams(searchParams);
         params.delete("taskId");
         router.push(`?${params.toString()}`);
@@ -44,7 +50,6 @@ export function TaskDetailSheet() {
         await updateTask(task.id, {
             title: task.title,
             description: task.description,
-            // TODO: Add other fields
         });
         handleClose();
     };
@@ -57,10 +62,8 @@ export function TaskDetailSheet() {
         }
     };
 
-    if (!taskId) return null;
-
     return (
-        <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+        <Sheet open={true} onOpenChange={(open) => !open && handleClose()}>
             <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
                 <SheetHeader>
                     <SheetTitle>Task Details</SheetTitle>

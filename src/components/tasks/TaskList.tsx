@@ -3,7 +3,15 @@
 import { TaskItem } from "./TaskItem";
 
 interface TaskListProps {
-    tasks: any[]; // TODO: Use proper type
+    tasks: {
+        id: number;
+        title: string;
+        description: string | null;
+        priority: "none" | "low" | "medium" | "high" | null;
+        dueDate: Date | null;
+        isCompleted: boolean | null;
+        estimateMinutes: number | null;
+    }[];
     title?: string;
 }
 

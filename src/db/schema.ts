@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text, primaryKey } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text, primaryKey, foreignKey } from "drizzle-orm/sqlite-core";
 
 export const lists = sqliteTable("lists", {
     id: integer("id").primaryKey({ autoIncrement: true }),
@@ -26,7 +26,7 @@ export const tasks = sqliteTable("tasks", {
     completedAt: integer("completed_at", { mode: "timestamp" }),
     isRecurring: integer("is_recurring", { mode: "boolean" }).default(false),
     recurringRule: text("recurring_rule"), // RRule string
-    parentId: integer("parent_id").references(() => tasks.id, { onDelete: "cascade" }), // For subtasks
+    parentId: integer("parent_id"), // For subtasks
     estimateMinutes: integer("estimate_minutes"),
     actualMinutes: integer("actual_minutes"),
     createdAt: integer("created_at", { mode: "timestamp" })
@@ -35,7 +35,12 @@ export const tasks = sqliteTable("tasks", {
     updatedAt: integer("updated_at", { mode: "timestamp" })
         .notNull()
         .default(sql`(unixepoch())`),
-});
+}, (table) => ({
+    parentReference: foreignKey({
+        columns: [table.parentId],
+        foreignColumns: [table.id],
+    }).onDelete("cascade"),
+}));
 
 export const labels = sqliteTable("labels", {
     id: integer("id").primaryKey({ autoIncrement: true }),

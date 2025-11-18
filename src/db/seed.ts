@@ -1,11 +1,11 @@
 import { db } from "./index";
-import { lists, labels, tasks } from "./schema";
+import { lists, labels } from "./schema";
 
 async function seed() {
     console.log("Seeding database...");
 
     // Create Inbox list if not exists
-    const inbox = await db.insert(lists).values({
+    await db.insert(lists).values({
         name: "Inbox",
         slug: "inbox",
         color: "#3b82f6", // Blue
