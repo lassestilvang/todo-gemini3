@@ -13,45 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createList, updateList, deleteList } from "@/lib/actions";
-import {
-    ListTodo,
-    Briefcase,
-    Home,
-    User,
-    Star,
-    Settings,
-    ShoppingCart,
-    Plane,
-    Dumbbell,
-    Book,
-    Music,
-    Video,
-    Code,
-    Coffee,
-    Sun,
-    Moon
-} from "lucide-react";
+import { LIST_ICONS as ICONS } from "@/lib/icons";
+import { ListTodo } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-
-const ICONS = [
-    { name: "list", icon: ListTodo },
-    { name: "briefcase", icon: Briefcase },
-    { name: "home", icon: Home },
-    { name: "user", icon: User },
-    { name: "star", icon: Star },
-    { name: "settings", icon: Settings },
-    { name: "shopping-cart", icon: ShoppingCart },
-    { name: "plane", icon: Plane },
-    { name: "dumbbell", icon: Dumbbell },
-    { name: "book", icon: Book },
-    { name: "music", icon: Music },
-    { name: "video", icon: Video },
-    { name: "code", icon: Code },
-    { name: "coffee", icon: Coffee },
-    { name: "sun", icon: Sun },
-    { name: "moon", icon: Moon },
-];
 
 const COLORS = [
     "#000000", // Black

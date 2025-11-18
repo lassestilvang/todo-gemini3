@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { SearchDialog } from "@/components/tasks/SearchDialog";
+import { getListIcon, getLabelIcon } from "@/lib/icons";
 
 type List = {
     id: number;
@@ -112,12 +113,10 @@ export function AppSidebar({ className, lists, labels }: { className?: string; l
                                     >
                                         <Link href={`/lists/${list.id}`}>
                                             {/* We need to map icon string to component or just use a generic one if not found */}
-                                            {/* For simplicity, using a colored dot or the icon if we can map it dynamically */}
-                                            {/* Since we can't easily map string to component dynamically without a map, I'll use the dot for now or try to map it */}
-                                            <div
-                                                className="mr-2 h-3 w-3 rounded-full"
-                                                style={{ backgroundColor: list.color || "#000000" }}
-                                            />
+                                            {(() => {
+                                                const Icon = getListIcon(list.icon);
+                                                return <Icon className="mr-2 h-4 w-4" style={{ color: list.color || "#000000" }} />;
+                                            })()}
                                             {list.name}
                                         </Link>
                                     </Button>
@@ -165,7 +164,10 @@ export function AppSidebar({ className, lists, labels }: { className?: string; l
                                     asChild
                                 >
                                     <Link href={`/labels/${label.id}`}>
-                                        <Hash className="mr-2 h-4 w-4" style={{ color: label.color || "#000000" }} />
+                                        {(() => {
+                                            const Icon = getLabelIcon(label.icon);
+                                            return <Icon className="mr-2 h-4 w-4" style={{ color: label.color || "#000000" }} />;
+                                        })()}
                                         {label.name}
                                     </Link>
                                 </Button>

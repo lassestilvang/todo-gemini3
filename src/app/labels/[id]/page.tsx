@@ -1,7 +1,7 @@
 import { getLabel, getTasks } from "@/lib/actions";
 import { TaskList } from "@/components/tasks/TaskList";
 import { notFound } from "next/navigation";
-import { Hash } from "lucide-react";
+import { getLabelIcon } from "@/lib/icons";
 
 interface LabelPageProps {
     params: Promise<{
@@ -21,12 +21,17 @@ export default async function LabelPage({ params }: LabelPageProps) {
 
     if (!label) return notFound();
 
+    const Icon = getLabelIcon(label.icon);
+
     return (
         <div className="container max-w-4xl py-6 lg:py-10">
             <div className="flex flex-col gap-8">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                        <Hash className="h-6 w-6" style={{ color: label.color || "#000000" }} />
+                        <Icon
+                            className="h-6 w-6"
+                            style={{ color: label.color || "#000000" }}
+                        />
                         {label.name}
                     </h1>
                 </div>

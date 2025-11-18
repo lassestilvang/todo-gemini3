@@ -13,33 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createLabel, updateLabel, deleteLabel } from "@/lib/actions";
-import {
-    Tag,
-    Flag,
-    Bookmark,
-    AlertCircle,
-    CheckCircle,
-    Clock,
-    Zap,
-    Heart,
-    Star,
-    Hash
-} from "lucide-react";
+import { LABEL_ICONS as ICONS } from "@/lib/icons";
+import { Hash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-
-const ICONS = [
-    { name: "hash", icon: Hash },
-    { name: "tag", icon: Tag },
-    { name: "flag", icon: Flag },
-    { name: "bookmark", icon: Bookmark },
-    { name: "alert", icon: AlertCircle },
-    { name: "check", icon: CheckCircle },
-    { name: "clock", icon: Clock },
-    { name: "zap", icon: Zap },
-    { name: "heart", icon: Heart },
-    { name: "star", icon: Star },
-];
 
 const COLORS = [
     "#000000", // Black
