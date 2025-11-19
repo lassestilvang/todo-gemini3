@@ -28,6 +28,8 @@ import {
 
 import { SearchDialog } from "@/components/tasks/SearchDialog";
 import { getListIcon, getLabelIcon } from "@/lib/icons";
+import { PlanningRitual } from "@/components/tasks/PlanningRitual";
+import { Sunrise, Sunset } from "lucide-react";
 
 type List = {
     id: number;
@@ -56,6 +58,8 @@ export function AppSidebar({ className, lists, labels }: { className?: string; l
     const pathname = usePathname();
     const [editingList, setEditingList] = useState<List | null>(null);
     const [editingLabel, setEditingLabel] = useState<Label | null>(null);
+    const [planningRitualOpen, setPlanningRitualOpen] = useState(false);
+    const [ritualType, setRitualType] = useState<"morning" | "evening">("morning");
 
     return (
         <div className={cn("pb-12 w-64 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-screen overflow-y-auto", className)}>
@@ -81,6 +85,34 @@ export function AppSidebar({ className, lists, labels }: { className?: string; l
                                 </Link>
                             </Button>
                         ))}
+                    </div>
+
+                    {/* Planning Rituals */}
+                    <div className="mt-4 space-y-1">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start text-xs"
+                            onClick={() => {
+                                setRitualType("morning");
+                                setPlanningRitualOpen(true);
+                            }}
+                        >
+                            <Sunrise className="mr-2 h-3 w-3 text-orange-500" />
+                            Morning Ritual
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start text-xs"
+                            onClick={() => {
+                                setRitualType("evening");
+                                setPlanningRitualOpen(true);
+                            }}
+                        >
+                            <Sunset className="mr-2 h-3 w-3 text-purple-500" />
+                            Evening Review
+                        </Button>
                     </div>
                 </div>
                 <Separator />
@@ -201,6 +233,13 @@ export function AppSidebar({ className, lists, labels }: { className?: string; l
                     onOpenChange={(open) => !open && setEditingLabel(null)}
                 />
             )}
+
+            {/* Planning Ritual Dialog */}
+            <PlanningRitual
+                open={planningRitualOpen}
+                onOpenChange={setPlanningRitualOpen}
+                type={ritualType}
+            />
         </div>
     );
 }

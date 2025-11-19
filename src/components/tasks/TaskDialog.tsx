@@ -24,11 +24,12 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { createTask, updateTask, deleteTask, getLists, getLabels } from "@/lib/actions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2, Focus } from "lucide-react";
 import { createSubtask, updateSubtask, deleteSubtask, getSubtasks, createReminder, deleteReminder, getReminders, getTaskLogs } from "@/lib/actions";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
+import { FocusMode } from "./FocusMode";
 
 type TaskType = {
     id: number;
@@ -40,6 +41,9 @@ type TaskType = {
     deadline: Date | null;
     isRecurring: boolean | null;
     recurringRule: string | null;
+    energyLevel: "high" | "medium" | "low" | null;
+    context: "computer" | "phone" | "errands" | "meeting" | "home" | "anywhere" | null;
+    isHabit: boolean | null;
     labels?: Array<{ id: number; name: string; color: string | null }>;
 };
 
@@ -115,6 +119,8 @@ function TaskForm({ task, defaultListId, onClose }: { task?: TaskType, defaultLi
     const [dueDate, setDueDate] = useState<Date | undefined>(task?.dueDate ? new Date(task.dueDate) : undefined);
     const [deadline, setDeadline] = useState<Date | undefined>(task?.deadline ? new Date(task.deadline) : undefined);
     const [selectedLabelIds, setSelectedLabelIds] = useState<number[]>(task?.labels?.map((l) => l.id) || []);
+    const [energyLevel, setEnergyLevel] = useState<"high" | "medium" | "low" | "none">(task?.energyLevel || "none");
+    const [context, setContext] = useState<"computer" | "phone" | "errands" | "meeting" | "home" | "anywhere" | "none">(task?.context || "none");
 
     const [lists, setLists] = useState<ListType[]>([]);
     const [labels, setLabels] = useState<LabelType[]>([]);
@@ -128,9 +134,15 @@ function TaskForm({ task, defaultListId, onClose }: { task?: TaskType, defaultLi
     const [isRecurring, setIsRecurring] = useState(task?.isRecurring || false);
     const [recurringRule, setRecurringRule] = useState(task?.recurringRule || "FREQ=DAILY");
 
+    // Habit state
+    const [isHabit, setIsHabit] = useState(task?.isHabit || false);
+
     // Subtasks state
     const [subtasks, setSubtasks] = useState<SubtaskType[]>([]);
     const [newSubtask, setNewSubtask] = useState("");
+
+    // Focus mode state
+    const [focusModeOpen, setFocusModeOpen] = useState(false);
 
     const isEdit = !!task;
 
@@ -210,7 +222,10 @@ function TaskForm({ task, defaultListId, onClose }: { task?: TaskType, defaultLi
                 deadline,
                 labelIds: selectedLabelIds,
                 isRecurring,
-                recurringRule: isRecurring ? recurringRule : null
+                recurringRule: isRecurring ? recurringRule : null,
+                energyLevel: energyLevel === "none" ? null : energyLevel,
+                context: context === "none" ? null : context,
+                isHabit: isRecurring ? isHabit : false, // Only allow habits for recurring tasks
             };
 
             if (isEdit) {
@@ -314,6 +329,41 @@ function TaskForm({ task, defaultListId, onClose }: { task?: TaskType, defaultLi
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
+                                    <Label>Energy Level</Label>
+                                    <Select value={energyLevel} onValueChange={(value) => setEnergyLevel(value as "high" | "medium" | "low" | "none")}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Energy" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">None</SelectItem>
+                                            <SelectItem value="high">🔋 High</SelectItem>
+                                            <SelectItem value="medium">🔌 Medium</SelectItem>
+                                            <SelectItem value="low">🪫 Low</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Context</Label>
+                                    <Select value={context} onValueChange={(value) => setContext(value as "computer" | "phone" | "errands" | "meeting" | "home" | "anywhere" | "none")}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Context" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">None</SelectItem>
+                                            <SelectItem value="computer">💻 Computer</SelectItem>
+                                            <SelectItem value="phone">📱 Phone</SelectItem>
+                                            <SelectItem value="errands">🏃 Errands</SelectItem>
+                                            <SelectItem value="meeting">👥 Meeting</SelectItem>
+                                            <SelectItem value="home">🏠 Home</SelectItem>
+                                            <SelectItem value="anywhere">🌍 Anywhere</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
                                     <Label>Due Date</Label>
                                     <div className="block">
                                         <DatePicker date={dueDate} setDate={setDueDate} />
@@ -354,6 +404,28 @@ function TaskForm({ task, defaultListId, onClose }: { task?: TaskType, defaultLi
                                     </Select>
                                 )}
                             </div>
+
+                            {/* Habit Tracking */}
+                            {isRecurring && (
+                                <div className="flex items-center space-x-2 border p-3 rounded-md bg-blue-500/5">
+                                    <Checkbox
+                                        id="habit"
+                                        checked={isHabit}
+                                        onCheckedChange={(checked) => setIsHabit(!!checked)}
+                                    />
+                                    <div className="grid gap-1.5 leading-none flex-1">
+                                        <Label
+                                            htmlFor="habit"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            🔥 Track as Habit
+                                        </Label>
+                                        <p className="text-xs text-muted-foreground">
+                                            Build streaks and see completion heatmap
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
 
                             {isEdit && (
                                 <div className="space-y-2">
@@ -498,9 +570,15 @@ function TaskForm({ task, defaultListId, onClose }: { task?: TaskType, defaultLi
 
             <DialogFooter className="px-6 py-4 border-t bg-muted/50 flex justify-between sm:justify-between">
                 {isEdit ? (
-                    <Button type="button" variant="destructive" onClick={handleDelete}>
-                        Delete
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button type="button" variant="outline" onClick={() => setFocusModeOpen(true)} className="gap-2">
+                            <Focus className="h-4 w-4" />
+                            Focus
+                        </Button>
+                        <Button type="button" variant="destructive" onClick={handleDelete}>
+                            Delete
+                        </Button>
+                    </div>
                 ) : <div></div>}
                 <div className="flex gap-2">
                     <Button type="button" variant="outline" onClick={onClose}>
@@ -509,6 +587,20 @@ function TaskForm({ task, defaultListId, onClose }: { task?: TaskType, defaultLi
                     <Button type="submit" form="task-form">Save</Button>
                 </div>
             </DialogFooter>
+
+            {/* Focus Mode Dialog */}
+            {isEdit && task && (
+                <FocusMode
+                    task={{
+                        id: task.id,
+                        title: task.title,
+                        estimateMinutes: null,
+                        actualMinutes: null
+                    }}
+                    open={focusModeOpen}
+                    onOpenChange={setFocusModeOpen}
+                />
+            )}
         </div >
     );
 }

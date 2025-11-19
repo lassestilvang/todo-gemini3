@@ -29,6 +29,9 @@ export const tasks = sqliteTable("tasks", {
     parentId: integer("parent_id"), // For subtasks
     estimateMinutes: integer("estimate_minutes"),
     actualMinutes: integer("actual_minutes"),
+    energyLevel: text("energy_level", { enum: ["high", "medium", "low"] }),
+    context: text("context", { enum: ["computer", "phone", "errands", "meeting", "home", "anywhere"] }),
+    isHabit: integer("is_habit", { mode: "boolean" }).default(false),
     createdAt: integer("created_at", { mode: "timestamp" })
         .notNull()
         .default(sql`(unixepoch())`),
@@ -80,6 +83,17 @@ export const taskLogs = sqliteTable("task_logs", {
         .references(() => tasks.id, { onDelete: "cascade" }),
     action: text("action").notNull(), // e.g., "created", "updated", "completed"
     details: text("details"), // JSON string or text description of change
+    createdAt: integer("created_at", { mode: "timestamp" })
+        .notNull()
+        .default(sql`(unixepoch())`),
+});
+
+export const habitCompletions = sqliteTable("habit_completions", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    taskId: integer("task_id")
+        .notNull()
+        .references(() => tasks.id, { onDelete: "cascade" }),
+    completedAt: integer("completed_at", { mode: "timestamp" }).notNull(),
     createdAt: integer("created_at", { mode: "timestamp" })
         .notNull()
         .default(sql`(unixepoch())`),

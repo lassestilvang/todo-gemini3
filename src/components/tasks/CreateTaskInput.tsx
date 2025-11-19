@@ -1,45 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calendar, Flag } from "lucide-react";
+import { Calendar, Flag, Zap, MapPin } from "lucide-react";
 import { createTask } from "@/lib/actions";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { parseNaturalLanguage } from "@/lib/nlp-parser";
+import { Badge } from "@/components/ui/badge";
 
 export function CreateTaskInput({ listId }: { listId?: number }) {
     const [title, setTitle] = useState("");
     const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
     const [priority, setPriority] = useState<"none" | "low" | "medium" | "high">("none");
+    const [energyLevel, setEnergyLevel] = useState<"high" | "medium" | "low" | undefined>(undefined);
+    const [context, setContext] = useState<"computer" | "phone" | "errands" | "meeting" | "home" | "anywhere" | undefined>(undefined);
     const [isExpanded, setIsExpanded] = useState(false);
+
+    // Parse natural language input
+    useEffect(() => {
+        if (title.trim()) {
+            const parsed = parseNaturalLanguage(title);
+            if (parsed.priority && priority === "none") setPriority(parsed.priority);
+            if (parsed.dueDate && !dueDate) setDueDate(parsed.dueDate);
+            if (parsed.energyLevel && !energyLevel) setEnergyLevel(parsed.energyLevel);
+            if (parsed.context && !context) setContext(parsed.context);
+        }
+    }, [title]);
 
     const handleSubmit = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!title.trim()) return;
 
+        // Parse again for final submission to get clean title
+        const parsed = parseNaturalLanguage(title);
+
         await createTask({
-            title,
-            listId: listId || null, // Default to Inbox (null listId usually means Inbox or specific ID)
-            // Wait, schema says listId references lists.id. Inbox has an ID.
-            // I should probably fetch Inbox ID or let the backend handle default.
-            // For now, let's assume listId is passed or we handle it.
-            // Actually, if listId is undefined, it might fail foreign key constraint if not nullable.
-            // Schema: listId: integer("list_id").references(...)
-            // It is NOT NULL by default in drizzle unless specified?
-            // Drizzle integer() is nullable by default unless .notNull() is called.
-            // My schema: listId: integer("list_id").references(...) -> It is nullable.
-            // So null listId = Inbox? Or should I enforce Inbox ID?
-            // Let's assume null = Inbox for now or I'll fix it.
-            dueDate: dueDate || null,
-            priority,
+            title: parsed.title || title,
+            listId: listId || null,
+            dueDate: dueDate || parsed.dueDate || null,
+            priority: priority !== "none" ? priority : (parsed.priority || "none"),
+            energyLevel: energyLevel || parsed.energyLevel || null,
+            context: context || parsed.context || null,
         });
 
         setTitle("");
         setDueDate(undefined);
         setPriority("none");
+        setEnergyLevel(undefined);
+        setContext(undefined);
         setIsExpanded(false);
     };
 
@@ -56,9 +68,39 @@ export function CreateTaskInput({ listId }: { listId?: number }) {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         onFocus={() => setIsExpanded(true)}
-                        placeholder="Add a task..."
+                        placeholder="Add a task... (try 'Buy milk tomorrow !high @errands')"
                         className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-lg py-6"
                     />
+
+                    {/* Preview Badges */}
+                    {title.trim() && (priority !== "none" || dueDate || energyLevel || context) && (
+                        <div className="px-4 pb-2 flex flex-wrap gap-1.5">
+                            {priority !== "none" && (
+                                <Badge variant="outline" className="text-xs gap-1">
+                                    <Flag className="h-3 w-3" />
+                                    {priority}
+                                </Badge>
+                            )}
+                            {dueDate && (
+                                <Badge variant="outline" className="text-xs gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {format(dueDate, "MMM d")}
+                                </Badge>
+                            )}
+                            {energyLevel && (
+                                <Badge variant="outline" className="text-xs gap-1">
+                                    <Zap className="h-3 w-3" />
+                                    {energyLevel}
+                                </Badge>
+                            )}
+                            {context && (
+                                <Badge variant="outline" className="text-xs gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    {context}
+                                </Badge>
+                            )}
+                        </div>
+                    )}
 
                     {isExpanded && (
                         <div className="flex items-center justify-between p-2 border-t bg-muted/20 rounded-b-lg">

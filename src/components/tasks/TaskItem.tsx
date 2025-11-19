@@ -23,6 +23,8 @@ export interface Task {
     isRecurring: boolean | null;
     listId: number | null;
     recurringRule: string | null;
+    energyLevel: "high" | "medium" | "low" | null;
+    context: "computer" | "phone" | "errands" | "meeting" | "home" | "anywhere" | null;
     labels?: Array<{ id: number; name: string; color: string | null }>;
 }
 
@@ -95,6 +97,23 @@ export function TaskItem({ task }: TaskItemProps) {
                         <div className="flex items-center gap-1 text-blue-500">
                             <Repeat className="h-3 w-3" />
                             <span>Recurring</span>
+                        </div>
+                    )}
+                    {task.energyLevel && (
+                        <div className="flex items-center gap-1">
+                            {task.energyLevel === "high" && "🔋"}
+                            {task.energyLevel === "medium" && "🔌"}
+                            {task.energyLevel === "low" && "🪫"}
+                        </div>
+                    )}
+                    {task.context && (
+                        <div className="flex items-center gap-1">
+                            {task.context === "computer" && "💻"}
+                            {task.context === "phone" && "📱"}
+                            {task.context === "errands" && "🏃"}
+                            {task.context === "meeting" && "👥"}
+                            {task.context === "home" && "🏠"}
+                            {task.context === "anywhere" && "🌍"}
                         </div>
                     )}
                 </div>
