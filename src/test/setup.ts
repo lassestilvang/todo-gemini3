@@ -2,8 +2,8 @@ import { expect, mock } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { sql } from "drizzle-orm";
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { Database } from "bun:sqlite";
+import { drizzle } from "drizzle-orm/bun-sqlite";
 import * as schema from "@/db/schema";
 
 // Register happy-dom for component testing
@@ -22,6 +22,7 @@ mock.module("next/cache", () => ({
 }));
 
 // Mock @/db globally to use the isolated test DB
+// We need to cast to unknown first because types might mismatch with BetterSQLite3Database
 mock.module("@/db", () => ({
     db: testDb,
 }));
