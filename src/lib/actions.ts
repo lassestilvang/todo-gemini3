@@ -463,7 +463,7 @@ export async function getActivityLog() {
     return await db.select({
         id: taskLogs.id,
         taskId: taskLogs.taskId,
-        taskTitle: tasks.title,
+        taskTitle: sql<string>`COALESCE(${tasks.title}, 'Unknown Task')`.as('task_title'),
         action: taskLogs.action,
         details: taskLogs.details,
         createdAt: taskLogs.createdAt

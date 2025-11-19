@@ -17,7 +17,7 @@ export default async function ActivityLogPage() {
                                 <span className="text-sm text-muted-foreground">{format(log.createdAt, "PPP p")}</span>
                             </div>
                             <div className="text-sm text-muted-foreground mt-1">
-                                Task: <span className="font-medium text-foreground">{log.taskTitle || "Unknown Task"}</span>
+                                Task: <span className="font-medium text-foreground">{log.taskTitle}</span>
                             </div>
                             {log.details && <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{log.details}</p>}
                         </div>

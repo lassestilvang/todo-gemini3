@@ -2,9 +2,7 @@ import { expect, mock } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { sql } from "drizzle-orm";
-import { Database } from "bun:sqlite";
-import { drizzle } from "drizzle-orm/bun-sqlite";
-import * as schema from "@/db/schema";
+import { db } from "@/db";
 
 // Register happy-dom for component testing
 GlobalRegistrator.register();
@@ -12,24 +10,15 @@ GlobalRegistrator.register();
 // Extend expect with jest-dom matchers
 expect.extend(matchers);
 
-// Create a fresh DB for this test context
-const sqlite = new Database(":memory:");
-const testDb = drizzle(sqlite, { schema });
-
 // Mock next/cache globally
 mock.module("next/cache", () => ({
     revalidatePath: () => { },
 }));
 
-// Mock @/db globally to use the isolated test DB
-// We need to cast to unknown first because types might mismatch with BetterSQLite3Database
-mock.module("@/db", () => ({
-    db: testDb,
-}));
 
 // Shared DB setup helper
 export async function setupTestDb() {
-    await testDb.run(sql`
+    await db.run(sql`
         CREATE TABLE IF NOT EXISTS lists(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -40,7 +29,7 @@ export async function setupTestDb() {
             updated_at INTEGER DEFAULT(strftime('%s', 'now'))
         );
     `);
-    await testDb.run(sql`
+    await db.run(sql`
         CREATE TABLE IF NOT EXISTS tasks(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             list_id INTEGER REFERENCES lists(id),
@@ -60,7 +49,7 @@ export async function setupTestDb() {
             deadline INTEGER
         );
     `);
-    await testDb.run(sql`
+    await db.run(sql`
         CREATE TABLE IF NOT EXISTS labels(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
@@ -68,14 +57,14 @@ export async function setupTestDb() {
             icon TEXT
         );
     `);
-    await testDb.run(sql`
+    await db.run(sql`
         CREATE TABLE IF NOT EXISTS task_labels(
             task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
             label_id INTEGER NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
             PRIMARY KEY(task_id, label_id)
         );
     `);
-    await testDb.run(sql`
+    await db.run(sql`
         CREATE TABLE IF NOT EXISTS task_logs(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
@@ -84,7 +73,7 @@ export async function setupTestDb() {
             created_at INTEGER DEFAULT(strftime('%s', 'now'))
         );
     `);
-    await testDb.run(sql`
+    await db.run(sql`
         CREATE TABLE IF NOT EXISTS reminders(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
@@ -96,10 +85,11 @@ export async function setupTestDb() {
 }
 
 export async function resetTestDb() {
-    await testDb.run(sql`DELETE FROM task_logs`);
-    await testDb.run(sql`DELETE FROM reminders`);
-    await testDb.run(sql`DELETE FROM task_labels`);
-    await testDb.run(sql`DELETE FROM tasks`);
-    await testDb.run(sql`DELETE FROM labels`);
-    await testDb.run(sql`DELETE FROM lists`);
+    await db.run(sql`DELETE FROM task_logs`);
+    await db.run(sql`DELETE FROM reminders`);
+    await db.run(sql`DELETE FROM task_labels`);
+    await db.run(sql`DELETE FROM tasks`);
+    await db.run(sql`DELETE FROM labels`);
+    await db.run(sql`DELETE FROM lists`);
 }
+
