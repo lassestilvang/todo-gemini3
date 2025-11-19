@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from "bun:test";
-import { createList, createTask, toggleTaskCompletion, getTasks } from "@/lib/actions";
 import { setupTestDb, resetTestDb } from "@/test/setup";
+import { createList, createTask, toggleTaskCompletion, getTasks } from "@/lib/actions";
 
 describe("Integration: Task Flow", () => {
     beforeAll(async () => {

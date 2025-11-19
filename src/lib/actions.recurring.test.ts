@@ -1,10 +1,10 @@
 
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
+import { setupTestDb } from "@/test/setup";
 import { db } from "@/db";
 import { tasks } from "@/db/schema";
 import { toggleTaskCompletion, createTask, getTask } from "@/lib/actions";
 import { eq } from "drizzle-orm";
-import { setupTestDb } from "@/test/setup";
 
 describe("Recurring Tasks Logic", () => {
     let taskId: number;

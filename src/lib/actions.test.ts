@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeAll, mock } from "bun:test";
-import { createTask, getTasks, updateTask, deleteTask, getTask, createReminder, getReminders, getTaskLogs } from "./actions";
 import { setupTestDb } from "@/test/setup";
+import { createTask, getTasks, updateTask, deleteTask, getTask, createReminder, getReminders, getTaskLogs } from "./actions";
 
 mock.module("next/cache", () => ({
     revalidatePath: () => { },
