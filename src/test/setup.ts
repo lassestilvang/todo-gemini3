@@ -77,3 +77,12 @@ export async function setupTestDb() {
         );
     `);
 }
+
+export async function resetTestDb() {
+    await db.run(sql`DELETE FROM task_logs`);
+    await db.run(sql`DELETE FROM reminders`);
+    await db.run(sql`DELETE FROM task_labels`);
+    await db.run(sql`DELETE FROM tasks`);
+    await db.run(sql`DELETE FROM labels`);
+    await db.run(sql`DELETE FROM lists`);
+}
