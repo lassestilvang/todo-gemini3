@@ -10,7 +10,12 @@ const mockGetLabels = mock(() => Promise.resolve([]));
 
 mock.module("@/lib/actions", () => ({
     getLists: mockGetLists,
-    getLabels: mockGetLabels
+    getLabels: mockGetLabels,
+    getUserStats: mock(() => Promise.resolve({ xp: 0, level: 1 }))
+}));
+
+mock.module("@/components/gamification/XPBar", () => ({
+    XPBar: () => <div data-testid="xp-bar">XP Bar</div>
 }));
 
 // Mock navigation

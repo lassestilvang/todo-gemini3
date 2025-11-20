@@ -1,8 +1,7 @@
 import { expect, mock } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { sql } from "drizzle-orm";
-import { db } from "@/db";
+import { sqliteConnection } from "@/db";
 
 // Register happy-dom for component testing
 GlobalRegistrator.register();
@@ -15,10 +14,14 @@ mock.module("next/cache", () => ({
     revalidatePath: () => { },
 }));
 
+// Mock canvas-confetti
+mock.module("canvas-confetti", () => ({
+    default: () => Promise.resolve(),
+}));
 
 // Shared DB setup helper
 export async function setupTestDb() {
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS lists(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -29,7 +32,7 @@ export async function setupTestDb() {
             updated_at INTEGER DEFAULT(strftime('%s', 'now'))
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS tasks(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             list_id INTEGER REFERENCES lists(id),
@@ -52,7 +55,7 @@ export async function setupTestDb() {
             deadline INTEGER
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS labels(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
@@ -60,23 +63,23 @@ export async function setupTestDb() {
             icon TEXT
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS task_labels(
             task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
             label_id INTEGER NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
             PRIMARY KEY(task_id, label_id)
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS task_logs(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+            task_id INTEGER REFERENCES tasks(id) ON DELETE CASCADE,
             action TEXT NOT NULL,
             details TEXT,
             created_at INTEGER DEFAULT(strftime('%s', 'now'))
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS reminders(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
@@ -85,7 +88,7 @@ export async function setupTestDb() {
             created_at INTEGER DEFAULT(strftime('%s', 'now'))
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS habit_completions(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
@@ -93,14 +96,14 @@ export async function setupTestDb() {
             created_at INTEGER DEFAULT(strftime('%s', 'now'))
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS task_dependencies(
             task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
             blocker_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
             PRIMARY KEY(task_id, blocker_id)
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS templates(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -109,7 +112,7 @@ export async function setupTestDb() {
             updated_at INTEGER DEFAULT(strftime('%s', 'now'))
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS user_stats(
             id INTEGER PRIMARY KEY DEFAULT 1,
             xp INTEGER NOT NULL DEFAULT 0,
@@ -119,7 +122,7 @@ export async function setupTestDb() {
             longest_streak INTEGER NOT NULL DEFAULT 0
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS achievements(
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -130,7 +133,7 @@ export async function setupTestDb() {
             xp_reward INTEGER NOT NULL
         );
     `);
-    await db.run(sql`
+    sqliteConnection.run(`
         CREATE TABLE IF NOT EXISTS user_achievements(
             achievement_id TEXT NOT NULL REFERENCES achievements(id) ON DELETE CASCADE,
             unlocked_at INTEGER DEFAULT(strftime('%s', 'now')),
@@ -141,17 +144,16 @@ export async function setupTestDb() {
 
 export async function resetTestDb() {
     // Delete in order respecting foreign key constraints
-    await db.run(sql`DELETE FROM user_achievements`);
-    await db.run(sql`DELETE FROM achievements`);
-    await db.run(sql`DELETE FROM task_logs`);
-    await db.run(sql`DELETE FROM reminders`);
-    await db.run(sql`DELETE FROM habit_completions`);
-    await db.run(sql`DELETE FROM task_dependencies`);
-    await db.run(sql`DELETE FROM task_labels`);
-    await db.run(sql`DELETE FROM tasks`);
-    await db.run(sql`DELETE FROM labels`);
-    await db.run(sql`DELETE FROM lists`);
-    await db.run(sql`DELETE FROM templates`);
-    await db.run(sql`DELETE FROM user_stats`);
+    sqliteConnection.run(`DELETE FROM user_achievements`);
+    sqliteConnection.run(`DELETE FROM achievements`);
+    sqliteConnection.run(`DELETE FROM task_logs`);
+    sqliteConnection.run(`DELETE FROM reminders`);
+    sqliteConnection.run(`DELETE FROM habit_completions`);
+    sqliteConnection.run(`DELETE FROM task_dependencies`);
+    sqliteConnection.run(`DELETE FROM task_labels`);
+    sqliteConnection.run(`DELETE FROM tasks`);
+    sqliteConnection.run(`DELETE FROM labels`);
+    sqliteConnection.run(`DELETE FROM lists`);
+    sqliteConnection.run(`DELETE FROM templates`);
+    sqliteConnection.run(`DELETE FROM user_stats`);
 }
-

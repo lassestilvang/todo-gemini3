@@ -1,5 +1,6 @@
 [test]
 preload = ["./src/test/setup.ts"]
+concurrent = false
 
 [test.env]
 NODE_ENV = "test"

@@ -31,7 +31,11 @@ mock.module("@/lib/actions", () => ({
     getReminders: mockGetReminders,
     createReminder: mockCreateReminder,
     deleteReminder: mockDeleteReminder,
-    getTaskLogs: mockGetTaskLogs
+    getTaskLogs: mockGetTaskLogs,
+    getBlockers: mock(() => Promise.resolve([])),
+    addDependency: mock(() => Promise.resolve()),
+    removeDependency: mock(() => Promise.resolve()),
+    searchTasks: mock(() => Promise.resolve([]))
 }));
 
 const sampleTask = {
@@ -44,7 +48,10 @@ const sampleTask = {
     deadline: null,
     isRecurring: false,
     recurringRule: null,
-    labels: []
+    labels: [],
+    energyLevel: "medium" as const,
+    context: "computer" as const,
+    isHabit: false
 };
 
 describe("TaskDialog", () => {

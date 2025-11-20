@@ -47,8 +47,9 @@ export async function getLabel(id: number) {
 }
 
 export async function createLabel(data: typeof labels.$inferInsert) {
-    await db.insert(labels).values(data);
+    const result = await db.insert(labels).values(data).returning();
     revalidatePath("/");
+    return result[0];
 }
 
 export async function updateLabel(id: number, data: Partial<typeof labels.$inferInsert>) {

@@ -21,6 +21,10 @@ mock.module("@/components/tasks/SearchDialog", () => ({
     SearchDialog: () => <div data-testid="search-dialog">Search Dialog</div>
 }));
 
+mock.module("@/components/gamification/XPBar", () => ({
+    XPBar: () => <div data-testid="xp-bar">XP Bar</div>
+}));
+
 const sampleLists = [
     { id: 1, name: "Personal", color: "#FF0000", icon: "user", slug: "personal" },
     { id: 2, name: "Work", color: "#0000FF", icon: "briefcase", slug: "work" }

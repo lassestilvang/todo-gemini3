@@ -70,7 +70,7 @@ export function FocusMode({ task, onClose }: FocusModeProps) {
             });
             toast.success("Task completed!");
             setTimeout(onClose, 2000);
-        } catch (error) {
+        } catch {
             toast.error("Failed to complete task");
         }
     };
@@ -82,6 +82,7 @@ export function FocusMode({ task, onClose }: FocusModeProps) {
                 size="icon"
                 className="absolute top-4 right-4"
                 onClick={onClose}
+                aria-label="Minimize Focus Mode"
             >
                 <Minimize2 className="h-6 w-6" />
             </Button>
@@ -114,6 +115,7 @@ export function FocusMode({ task, onClose }: FocusModeProps) {
                         variant="outline"
                         className="h-16 w-16 rounded-full border-2"
                         onClick={resetTimer}
+                        aria-label="Reset Timer"
                     >
                         <RotateCcw className="h-6 w-6" />
                     </Button>
@@ -125,6 +127,7 @@ export function FocusMode({ task, onClose }: FocusModeProps) {
                             isActive ? "bg-red-500 hover:bg-red-600" : "bg-primary hover:bg-primary/90"
                         )}
                         onClick={toggleTimer}
+                        aria-label={isActive ? "Pause Timer" : "Start Timer"}
                     >
                         {isActive ? (
                             <Pause className="h-10 w-10" />
@@ -138,6 +141,7 @@ export function FocusMode({ task, onClose }: FocusModeProps) {
                         variant="outline"
                         className="h-16 w-16 rounded-full border-2 hover:bg-green-100 hover:text-green-700 hover:border-green-200 dark:hover:bg-green-900/30 dark:hover:text-green-400 dark:hover:border-green-800"
                         onClick={handleComplete}
+                        aria-label="Complete Task"
                     >
                         <CheckCircle2 className="h-6 w-6" />
                     </Button>

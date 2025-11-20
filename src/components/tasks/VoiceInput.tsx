@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Mic, MicOff, Loader2 } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -95,7 +95,9 @@ export function VoiceInput({ onTranscript, className }: VoiceInputProps) {
 // Add type definition for Web Speech API
 declare global {
     interface Window {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         SpeechRecognition: any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         webkitSpeechRecognition: any;
     }
     interface SpeechRecognition extends EventTarget {
