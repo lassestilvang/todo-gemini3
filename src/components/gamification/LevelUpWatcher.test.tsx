@@ -1,27 +1,42 @@
+import { describe, it, expect, beforeEach, afterEach, mock, jest } from "bun:test";
 import { render, screen, act, waitFor } from "@testing-library/react";
 import { LevelUpWatcher } from "./LevelUpWatcher";
 import { getUserStats } from "@/lib/actions";
 
 // Mock the actions
-jest.mock("@/lib/actions", () => ({
+mock.module("@/lib/actions", () => ({
     getUserStats: jest.fn(),
 }));
 
-// Mock the modal to avoid rendering complex UI and canvas-confetti
-jest.mock("./LevelUpModal", () => ({
+// Mock the modal
+mock.module("./LevelUpModal", () => ({
     LevelUpModal: ({ open, level }: { open: boolean; level: number }) => (
         open ? <div data-testid="level-up-modal">Level Up! {level}</div> : null
     ),
 }));
 
 describe("LevelUpWatcher", () => {
+    let originalSetInterval: typeof setInterval;
+    let originalClearInterval: typeof clearInterval;
+    let intervalCallback: (() => void) | null = null;
+
     beforeEach(() => {
-        jest.clearAllMocks();
-        jest.useFakeTimers();
+        originalSetInterval = global.setInterval;
+        originalClearInterval = global.clearInterval;
+        intervalCallback = null;
+
+        // Mock setInterval to capture the callback
+        global.setInterval = ((callback: () => void, _: number) => {
+            intervalCallback = callback;
+            return 123 as unknown as NodeJS.Timeout;
+        }) as unknown as typeof setInterval;
+
+        global.clearInterval = (() => { }) as unknown as typeof clearInterval;
     });
 
     afterEach(() => {
-        jest.useRealTimers();
+        global.setInterval = originalSetInterval;
+        global.clearInterval = originalClearInterval;
     });
 
     it("should not show modal on initial load", async () => {
@@ -42,23 +57,28 @@ describe("LevelUpWatcher", () => {
         // Initial level 5
         (getUserStats as jest.Mock)
             .mockResolvedValueOnce({ level: 5 })
+            .mockResolvedValueOnce({ level: 5 }) // Re-check after state update
             .mockResolvedValue({ level: 6 }); // Subsequent calls return level 6
 
         await act(async () => {
             render(<LevelUpWatcher />);
         });
 
-        // Initial state: no modal
         expect(screen.queryByTestId("level-up-modal")).toBeNull();
 
-        // Fast-forward time to trigger polling
-        await act(async () => {
-            jest.advanceTimersByTime(2000);
-        });
+        // Trigger the interval callback manually
+        if (intervalCallback) {
+            await act(async () => {
+                await intervalCallback!();
+            });
+        }
+
+
 
         // Should show modal with new level
         await waitFor(() => {
-            expect(screen.getByTestId("level-up-modal")).toHaveTextContent("Level Up! 6");
+            expect(screen.getByTestId("level-up-modal")).not.toBeNull();
+            expect(screen.getByTestId("level-up-modal").textContent).toContain("Level Up! 6");
         });
     });
 
@@ -69,10 +89,12 @@ describe("LevelUpWatcher", () => {
             render(<LevelUpWatcher />);
         });
 
-        // Fast-forward time
-        await act(async () => {
-            jest.advanceTimersByTime(2000);
-        });
+        // Trigger the interval callback manually
+        if (intervalCallback) {
+            await act(async () => {
+                await intervalCallback!();
+            });
+        }
 
         expect(screen.queryByTestId("level-up-modal")).toBeNull();
     });
