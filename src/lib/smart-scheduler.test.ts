@@ -69,7 +69,7 @@ describe("smart-scheduler", () => {
         });
 
         it("returns empty if client is null", async () => {
-            mockGetGeminiClient.mockReturnValueOnce(undefined as any);
+            mockGetGeminiClient.mockReturnValueOnce(undefined as unknown as any);
             const subtasks = await generateSubtasks("Test Task");
             expect(subtasks).toEqual([]);
         });
@@ -123,7 +123,7 @@ describe("smart-scheduler", () => {
         });
 
         it("returns null if client is null", async () => {
-            mockGetGeminiClient.mockReturnValueOnce(undefined as any);
+            mockGetGeminiClient.mockReturnValueOnce(undefined as unknown as any);
             const result = await extractDeadline("Task");
             expect(result).toBeNull();
         });

@@ -18,17 +18,14 @@ mock.module("./LevelUpModal", () => ({
 describe("LevelUpWatcher", () => {
     let originalSetInterval: typeof setInterval;
     let originalClearInterval: typeof clearInterval;
-    let intervalCallback: (() => void) | null = null;
 
     beforeEach(() => {
         originalSetInterval = global.setInterval;
         originalClearInterval = global.clearInterval;
-        intervalCallback = null;
 
         // Mock setInterval to capture the callback
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        global.setInterval = ((callback: () => void, _: number) => {
-            intervalCallback = callback;
+        global.setInterval = ((callback: () => void, ms?: number) => {
             return 123 as unknown as NodeJS.Timeout;
         }) as unknown as typeof setInterval;
 

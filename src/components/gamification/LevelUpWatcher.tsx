@@ -5,7 +5,6 @@ import { getUserStats } from "@/lib/actions";
 import { LevelUpModal } from "./LevelUpModal";
 
 export function LevelUpWatcher() {
-    const [level, setLevel] = useState<number | null>(null);
     const [showLevelUp, setShowLevelUp] = useState(false);
     const [newLevel, setNewLevel] = useState(1);
 
@@ -13,7 +12,6 @@ export function LevelUpWatcher() {
         const checkLevel = async () => {
             const stats = await getUserStats();
             if (!stats) return;
-            setLevel(stats.level);
         };
 
         // Initial check
@@ -23,7 +21,6 @@ export function LevelUpWatcher() {
             if (event.detail.leveledUp) {
                 setNewLevel(event.detail.level);
                 setShowLevelUp(true);
-                setLevel(event.detail.level);
             }
         };
 
